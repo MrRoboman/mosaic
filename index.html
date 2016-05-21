@@ -9,7 +9,13 @@
   <body>
     <canvas id="canvas"></canvas>
     <script>
-      new Mosaic({canvasId: "canvas", pictureUrls: ['sq-apples.jpg']});
+      new Mosaic({canvasId: "canvas",
+                  imageUrls: ['sq-apples.jpg'],
+                  width: 640,
+                  height: 640,
+                  rows: 2,
+                  cols: 2
+                });
     </script>
   </body>
 </html>
