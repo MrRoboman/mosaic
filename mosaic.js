@@ -4,6 +4,7 @@ var Mosaic = function(options) {
   this.width = options.width || 640;
   this.height = options.height || 640;
   this.setRowsCols(options.rows, options.cols);
+  this.selectedIdx = 1;
   this.scale = 1;
   this.playing = false;
 
@@ -73,7 +74,8 @@ Mosaic.prototype = {
   },
 
   update: function() {
-    this.scale += .001;
+    if(this.scale < this.cols)
+    this.scale += .01;
     this.drawMiddleGrid();
     if(this.playing) {
       window.requestAnimationFrame(this.update.bind(this));
@@ -96,27 +98,35 @@ Mosaic.prototype = {
     }
   },
 
+  offsetX: function(idx) {
+    return -this.width * idx * (this.scale-1) / (this.cols-1);
+  },
+
+  offsetY: function(idx) {
+    return -this.height * idx * (this.scale-1) / (this.cols-1);
+  },
+
   getMiddleGridX: function(idx) {
-    return this.width / this.cols * this.getGridX(idx);
+    return this.width / this.cols * this.getCellX(idx) * this.scale + this.offsetX(3);
   },
 
   getMiddleGridY: function(idx) {
-    return this.height / this.rows * this.getGridY(idx);
+    return this.height / this.rows * this.getCellY(idx) * this.scale + this.offsetY(3);
   },
 
   getMiddleGridW: function() {
-    return this.width / this.cols;
+    return this.width / this.cols * this.scale;
   },
 
   getMiddleGridH: function() {
-    return this.height / this.rows;
+    return this.height / this.rows * this.scale;
   },
 
-  getGridX: function(idx) {
+  getCellX: function(idx) {
     return idx % this.cols;
   },
 
-  getGridY: function(idx) {
+  getCellY: function(idx) {
     return Math.floor(idx / this.rows);
   }
 };
