@@ -5,7 +5,8 @@ var Mosaic = function(options) {
   this.width = options.width || 640;
   this.height = options.height || 640;
   this.setRowsCols(options.rows, options.cols);
-  this.selectedIdx = 1;
+  this.zoomMs = options.zoomMs || 3000;
+  this.selectedIdx = null;
   this.scale = 1;
   this.playing = false;
 
@@ -68,6 +69,7 @@ Mosaic.prototype = {
 
   play: function() {
     this.playing = true;
+    this.startTime = Date.now();
     window.requestAnimationFrame(this.update.bind(this));
   },
 
@@ -98,14 +100,19 @@ Mosaic.prototype = {
 
   update: function() {
     if(this.playing) {
-      if(this.scale < this.cols){
-        this.scale += .01;
-      }else {
-        this.scale = 1;
+
+      var elapsed = Date.now() - this.startTime;
+      var progress = elapsed / this.zoomMs;
+
+      this.scale = (this.cols-1) * progress + 1;
+      if(this.scale >= this.cols){
+        this.scale = this.cols;
         this.stop();
       }
+
       this.clear();
       this.middleGrid.draw();
+
       window.requestAnimationFrame(this.update.bind(this));
     }
   },
