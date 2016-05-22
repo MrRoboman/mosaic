@@ -13,9 +13,9 @@ var Mosaic = function(options) {
   this.initImages();
 
   // this.middleGrid = this.getRandomImages();
-  this.middleGrid = new MiddleGrid(this, this.getRandomImages(), 0, 1);
+  this.middleGrid = new MiddleGrid(this, this.getRandomImages(), .5, 1);
 
-  this.play();
+  // this.play();
 };
 
 Mosaic.prototype = {
@@ -44,18 +44,26 @@ Mosaic.prototype = {
     this.imageUrls.forEach(function(imgUrl){
       var img = new Image();
       img.loadAlpha = 0;
-      img.onload = this.onImageLoad;
+      img.onload = this.onImageLoad.bind(this);
       img.src = imgUrl;
       this.images.push(img);
     }.bind(this));
   },
 
   onImageLoad: function(e) {
-    this.loadAlpha = 1;
+    e.currentTarget.loadAlpha = 1;
+    this.middleGrid.draw();
   },
 
   onClickCanvas: function(e) {
+    if(this.playing) return;
 
+    var x = e.clientX + document.body.scrollLeft + this.canvas.scrollLeft - this.canvas.offsetLeft;
+    var y = e.clientY + document.body.scrollTop + this.canvas.scrollTop - this.canvas.offsetTop;
+    var cellX = Math.floor(x / (this.width / this.cols));
+    var cellY = Math.floor(y / (this.height / this.rows));
+    this.selectedIdx = this.getIndex(cellX, cellY);
+    this.play();
   },
 
   play: function() {
@@ -92,6 +100,9 @@ Mosaic.prototype = {
     if(this.playing) {
       if(this.scale < this.cols){
         this.scale += .01;
+      }else {
+        this.scale = 1;
+        this.stop();
       }
       this.clear();
       this.middleGrid.draw();
@@ -124,5 +135,9 @@ Mosaic.prototype = {
 
   getCellY: function(idx) {
     return Math.floor(idx / this.rows);
+  },
+
+  getIndex: function(cellX, cellY){
+    return cellY * this.cols + cellX;
   }
 };
