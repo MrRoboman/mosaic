@@ -7,6 +7,7 @@ var Mosaic = function(options) {
   this.setRowsCols(options.rows, options.cols);
   this.zoomMs = options.zoomMs || 3000;
   this.selectedIdx = null;
+  this.selectedCell = {x: 0, y: 0};
   this.scale = 1;
   this.playing = false;
 
@@ -14,6 +15,7 @@ var Mosaic = function(options) {
   this.initImages();
 
   // this.middleGrid = this.getRandomImages();
+  // this.smallGrid = new SmallGrid(this, this.getRandomImages(), 0, .5);
   this.middleGrid = new MiddleGrid(this, this.getRandomImages(), .5, 1);
 
   // this.play();
@@ -64,6 +66,7 @@ Mosaic.prototype = {
     var cellX = Math.floor(x / (this.width / this.cols));
     var cellY = Math.floor(y / (this.height / this.rows));
     this.selectedIdx = this.getIndex(cellX, cellY);
+    this.selectedCell = {x: cellX, y: cellY};
     this.play();
   },
 
@@ -79,8 +82,11 @@ Mosaic.prototype = {
 
   getRandomImages: function() {
     var images = [];
-    for(var i = 0; i < this.totalCells; i++){
-      images.push(this.getRandomElement(this.images));
+    for(var c = 0; c < this.cols; c++){
+      images.push([]);
+      for(var r = 0; r < this.rows; r++) {
+        images[c].push(this.getRandomElement(this.images));
+      }
     }
     return images;
   },
@@ -122,9 +128,15 @@ Mosaic.prototype = {
   },
 
   draw: function(img, x, y, w, h, alpha){
-    this.ctx.globalAlpha = alpha;
-    this.ctx.drawImage(img, x, y, w, h);
-    this.ctx.globalAlpha = 1;
+    if(this.isInCanvasBounds(x, y, w, h)) {
+      this.ctx.globalAlpha = alpha;
+      this.ctx.drawImage(img, x, y, w, h);
+      this.ctx.globalAlpha = 1;
+    }
+  },
+
+  isInCanvasBounds: function(x, y, w, h) {
+    return x < this.width && x + w > 0 && y < this.width && y + h > 0;
   },
 
   getScaleProgress: function() {
