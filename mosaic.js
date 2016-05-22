@@ -1,6 +1,7 @@
 var Mosaic = function(options) {
   this.canvasId = options.canvasId;
   this.imageUrls = options.imageUrls || [];
+  this.fullscreen = options.fullscreen || false;
   this.width = options.width || 640;
   this.height = options.height || 640;
   this.setRowsCols(options.rows, options.cols);
@@ -11,17 +12,31 @@ var Mosaic = function(options) {
   this.initCanvas();
   this.initImages();
 
-  this.middleGrid = this.getRandomImages();
+  // this.middleGrid = this.getRandomImages();
+  this.middleGrid = new MiddleGrid(this, this.getRandomImages(), 0, 1);
 
   this.play();
 };
 
 Mosaic.prototype = {
 
+  dismount: function() {
+    this.stop();
+    this.canvas.removeEventListener('click', this.onClickCanvas.bind(this));
+
+    this.canvas = null;
+    this.ctx = null;
+    this.imageUrls = null;
+    this.images = null;
+    this.middleGrid = null;
+  },
+
   initCanvas: function() {
     this.canvas = document.getElementById(this.canvasId);
     this.ctx = this.canvas.getContext('2d');
     this.resize();
+
+    this.canvas.addEventListener('click', this.onClickCanvas.bind(this));
   },
 
   initImages: function() {
@@ -36,6 +51,10 @@ Mosaic.prototype = {
   },
 
   onImageLoad: function(e) {
+    this.loadAlpha = 1;
+  },
+
+  onClickCanvas: function(e) {
 
   },
 
@@ -62,10 +81,6 @@ Mosaic.prototype = {
     this.totalCells = rows * cols;
   },
 
-  totalCells: function() {
-    return this.cols * this.rows;
-  },
-
   resize: function() {
     if(this.canvas) {
       this.canvas.width = this.width;
@@ -74,52 +89,33 @@ Mosaic.prototype = {
   },
 
   update: function() {
-    if(this.scale < this.cols)
-    this.scale += .01;
-    this.drawMiddleGrid();
     if(this.playing) {
+      if(this.scale < this.cols){
+        this.scale += .01;
+      }
+      this.clear();
+      this.middleGrid.draw();
       window.requestAnimationFrame(this.update.bind(this));
     }
+  },
+
+  clear: function() {
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  },
+
+  draw: function(img, x, y, w, h, alpha){
+    this.ctx.globalAlpha = alpha;
+    this.ctx.drawImage(img, x, y, w, h);
+    this.ctx.globalAlpha = 1;
+  },
+
+  getScaleProgress: function() {
+    return (this.scale-1) / (this.cols-1);
   },
 
   getRandomElement: function(arr) {
     var r = Math.floor(Math.random() * arr.length);
     return arr[r];
-  },
-
-  drawMiddleGrid: function() {
-    for(var i = 0; i < this.middleGrid.length; i++){
-      var img = this.middleGrid[i];
-      var x = this.getMiddleGridX(i);
-      var y = this.getMiddleGridY(i);
-      var w = this.getMiddleGridW();
-      var h = this.getMiddleGridH();
-      this.ctx.drawImage(img, x, y, w, h);
-    }
-  },
-
-  offsetX: function(idx) {
-    return -this.width * idx * (this.scale-1) / (this.cols-1);
-  },
-
-  offsetY: function(idx) {
-    return -this.height * idx * (this.scale-1) / (this.cols-1);
-  },
-
-  getMiddleGridX: function(idx) {
-    return this.width / this.cols * this.getCellX(idx) * this.scale + this.offsetX(3);
-  },
-
-  getMiddleGridY: function(idx) {
-    return this.height / this.rows * this.getCellY(idx) * this.scale + this.offsetY(3);
-  },
-
-  getMiddleGridW: function() {
-    return this.width / this.cols * this.scale;
-  },
-
-  getMiddleGridH: function() {
-    return this.height / this.rows * this.scale;
   },
 
   getCellX: function(idx) {
