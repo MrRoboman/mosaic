@@ -9,6 +9,7 @@ var MiddleGrid = function(mosaic, images, startAlpha, endAlpha) {
 MiddleGrid.prototype = {
   draw: function() {
     var bounds = this.getDrawBounds();
+    console.log(bounds.right, bounds.bottom);
     for(var c = bounds.left; c < bounds.right; c++){
       for(var r = bounds.top; r < bounds.bottom; r++) {
         var img = this.images[c][r];
@@ -30,25 +31,32 @@ MiddleGrid.prototype = {
       bottom: this.mosaic.rows
     };
 
-    var x = this.getX(0);
-    if(x < 0) {
-      bounds.left = Math.floor(-x / this.getW());
+    var w = this.getW();
+    var h = this.getH();
+
+    var left = this.getX(0);
+    var right = this.getX(this.mosaic.cols-1) + w;
+    var top = this.getY(0);
+    var bottom = this.getY(this.mosaic.rows-1) + h;
+
+    if(left < 0) {
+      bounds.left = Math.floor(-left / w);
     }
-    var y = this.getY(0);
-    if(y < 0){
-      bounds.top = Math.floor(-y / this.getH());
+
+    if(top < 0){
+      bounds.top = Math.floor(-top / h);
     }
-    x = this.getX(this.mosaic.cols-1) + this.getW();
-    if(x > this.mosaic.width) {
-      x = this.mosaic.width - x;
-      x = Math.ceil(x / this.getW());
-      bounds.right += x;
+
+    if(right > this.mosaic.width) {
+      right -= this.mosaic.width;
+      right = Math.floor(right / w);
+      bounds.right -= right;
     }
-    y = this.getY(this.mosaic.rows-1) + this.getH();
-    if(y > this.mosaic.height) {
-      y = this.mosaic.height - y;
-      y = Math.ceil(y / this.getH());
-      bounds.bottom += y;
+
+    if(bottom > this.mosaic.height) {
+      bottom -= this.mosaic.height;
+      bottom = Math.floor(bottom / h);
+      bounds.bottom -= bottom;
     }
 
     return bounds;
