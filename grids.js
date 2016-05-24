@@ -1,4 +1,9 @@
 
+
+/**************
+* Middle Grid *
+**************/
+
 var MiddleGrid = function(mosaic, images, startAlpha, endAlpha) {
   this.mosaic = mosaic;
   this.images = images;
@@ -9,7 +14,6 @@ var MiddleGrid = function(mosaic, images, startAlpha, endAlpha) {
 MiddleGrid.prototype = {
   draw: function() {
     var bounds = this.getDrawBounds();
-    console.log(bounds.right, bounds.bottom);
     for(var c = bounds.left; c < bounds.right; c++){
       for(var r = bounds.top; r < bounds.bottom; r++) {
         var img = this.images[c][r];
