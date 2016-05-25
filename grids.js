@@ -3,38 +3,49 @@
 * Middle Grid *
 **************/
 
-var MiddleGrid = function(mosaic, images, startAlpha, endAlpha) {
+var MiddleGrid = function(mosaic, smallImages, images, startAlpha, endAlpha) {
   this.mosaic = mosaic;
+  this.smallImages = smallImages;
   this.images = images;
+  this.mainImage = images[0][0];
   this.startAlpha = startAlpha;
   this.endAlpha = endAlpha;
 };
 
 MiddleGrid.prototype = {
   draw: function() {
+
+    //Big
+    var img = this.mainImage;
+    var x = this.getX(0);
+    var y = this.getY(0);
+    var w = this.mosaic.width * this.mosaic.scale;
+    var h = this.mosaic.height * this.mosaic.scale;
+    var a = this.getAlpha(1,0) * img.loadAlpha;
+    this.mosaic.draw(img, x, y, w, h, a);
+
+    // Middle
     var bounds = this.getDrawBounds();
     for(var c = bounds.left; c < bounds.right; c++){
       for(var r = bounds.top; r < bounds.bottom; r++) {
-
-        //Middle
-        var img = this.images[c][r];
-        var x = this.getX(c);
-        var y = this.getY(r);
-        var w = this.getW();
-        var h = this.getH();
-        var a = this.getAlpha() * img.loadAlpha;
-        // this.mosaic.draw(img, x, y, w, h, a);
+        img = this.images[c][r];
+        x = this.getX(c);
+        y = this.getY(r);
+        w = this.getW();
+        h = this.getH();
+        a = this.getAlpha(this.startAlpha, this.endAlpha) * img.loadAlpha;
+        this.mosaic.draw(img, x, y, w, h, a);
 
         //Small
         var smBounds = this.getSmallDrawBounds(c, r);
         for(var smC = smBounds.left; smC < smBounds.right; smC++){
           for(var smR = smBounds.top; smR < smBounds.bottom; smR++){
-            img = this.images[smC][smR];
+            img = this.smallImages[smC][smR];
             x = this.getSmallX(c, smC);
             y = this.getSmallY(r, smR);
             w = this.getSmallW();
             h = this.getSmallH();
-            a = this.getSmallAlpha() * img.loadAlpha; a = 1
+            a = this.getAlpha(0, this.startAlpha) * img.loadAlpha;
             this.mosaic.draw(img, x, y, w, h, a);
           }
         }
@@ -42,14 +53,7 @@ MiddleGrid.prototype = {
     }
   },
 
-
-
   //Small
-
-  getSmallAlpha: function() {
-    var alphaRange = this.startAlpha;
-    return alphaRange * this.mosaic.getScaleProgress();
-  },
 
   getSmallDrawBounds: function(col, row) {
     // x y indices
@@ -160,9 +164,9 @@ MiddleGrid.prototype = {
     return bounds;
   },
 
-  getAlpha: function() {
-    var alphaRange = this.endAlpha - this.startAlpha;
-    return alphaRange * this.mosaic.getScaleProgress() + this.startAlpha;
+  getAlpha: function(startAlpha, endAlpha) {
+    var alphaRange = endAlpha - startAlpha;
+    return alphaRange * this.mosaic.getScaleProgress() + startAlpha;
   },
 
   offsetX: function(cellX) {
@@ -188,4 +192,9 @@ MiddleGrid.prototype = {
   getH: function() {
     return this.mosaic.height / this.mosaic.rows * this.mosaic.scale;
   },
+
+  swapImages: function(selectedCell) {
+    this.mainImage = this.images[selectedCell.x][selectedCell.y];
+    this.images = this.smallImages;
+  }
 };

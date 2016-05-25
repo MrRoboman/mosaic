@@ -16,7 +16,7 @@ var Mosaic = function(options) {
 
   // this.middleGrid = this.getRandomImages();
   // this.smallGrid = new SmallGrid(this, this.getRandomImages(), 0, .5);
-  this.middleGrid = new MiddleGrid(this, this.getRandomImages(), .5, 1);
+  this.middleGrid = new MiddleGrid(this, this.getRandomImages(), this.getRandomImages(), .33, 1);
 
   // this.play();
 };
@@ -67,6 +67,7 @@ Mosaic.prototype = {
     var cellY = Math.floor(y / (this.height / this.rows));
     this.selectedIdx = this.getIndex(cellX, cellY);
     this.selectedCell = {x: cellX, y: cellY};
+    this.middleGrid.smallImages = this.getRandomImages();
     this.play();
   },
 
@@ -112,7 +113,8 @@ Mosaic.prototype = {
 
       this.scale = (this.cols-1) * progress + 1;
       if(this.scale >= this.cols){
-        this.scale = this.cols;
+        this.middleGrid.swapImages(this.selectedCell);
+        this.scale = 1;
         this.stop();
       }
 
