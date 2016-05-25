@@ -16,29 +16,28 @@ MiddleGrid.prototype = {
     for(var c = bounds.left; c < bounds.right; c++){
       for(var r = bounds.top; r < bounds.bottom; r++) {
 
+        //Middle
+        var img = this.images[c][r];
+        var x = this.getX(c);
+        var y = this.getY(r);
+        var w = this.getW();
+        var h = this.getH();
+        var a = this.getAlpha() * img.loadAlpha;
+        // this.mosaic.draw(img, x, y, w, h, a);
+
         //Small
         var smBounds = this.getSmallDrawBounds(c, r);
         for(var smC = smBounds.left; smC < smBounds.right; smC++){
           for(var smR = smBounds.top; smR < smBounds.bottom; smR++){
-            var img = this.images[smC][smR];
-            var x = this.getSmallX(c, smC);
-            var y = this.getSmallY(r, smR);
-            var w = this.getSmallW();
-            var h = this.getSmallH();
-            var a = this.getSmallAlpha() * img.loadAlpha;
+            img = this.images[smC][smR];
+            x = this.getSmallX(c, smC);
+            y = this.getSmallY(r, smR);
+            w = this.getSmallW();
+            h = this.getSmallH();
+            a = this.getSmallAlpha() * img.loadAlpha; a = 1
             this.mosaic.draw(img, x, y, w, h, a);
-            debugger;
           }
         }
-
-        //Middle
-        img = this.images[c][r];
-        x = this.getX(c);
-        y = this.getY(r);
-        w = this.getW();
-        h = this.getH();
-        a = this.getAlpha() * img.loadAlpha;
-        // this.mosaic.draw(img, x, y, w, h, a);
       }
     }
   },
@@ -48,8 +47,8 @@ MiddleGrid.prototype = {
   //Small
 
   getSmallAlpha: function() {
-    var alphaRange = this.endAlpha - this.startAlpha;
-    return alphaRange * this.mosaic.getScaleProgress() + this.startAlpha;
+    var alphaRange = this.startAlpha;
+    return alphaRange * this.mosaic.getScaleProgress();
   },
 
   getSmallDrawBounds: function(col, row) {
@@ -64,10 +63,10 @@ MiddleGrid.prototype = {
     var w = this.getSmallW();
     var h = this.getSmallH();
 
-    var left = this.getSmallX(0);
-    var right = this.getSmallX(this.mosaic.cols-1) + w;
-    var top = this.getSmallY(0);
-    var bottom = this.getSmallY(this.mosaic.rows-1) + h;
+    var left = this.getSmallX(col,0);
+    var right = this.getSmallX(col, this.mosaic.cols-1) + w;
+    var top = this.getSmallY(row, 0);
+    var bottom = this.getSmallY(row, this.mosaic.rows-1) + h;
 
     if(left < 0) {
       bounds.left = Math.floor(-left / w);
@@ -102,7 +101,6 @@ MiddleGrid.prototype = {
 
   getSmallX: function(cellX, smallCellX) {
     var middleCellX = this.mosaic.width / this.mosaic.cols * cellX * this.mosaic.scale + this.offsetX(this.mosaic.selectedCell.x);
-    // debugger;
     return middleCellX + this.getSmallW() * smallCellX;
   },
 
