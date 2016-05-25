@@ -1,5 +1,4 @@
 
-
 /**************
 * Middle Grid *
 **************/
@@ -16,16 +15,113 @@ MiddleGrid.prototype = {
     var bounds = this.getDrawBounds();
     for(var c = bounds.left; c < bounds.right; c++){
       for(var r = bounds.top; r < bounds.bottom; r++) {
-        var img = this.images[c][r];
-        var x = this.getX(c);
-        var y = this.getY(r);
-        var w = this.getW();
-        var h = this.getH();
-        var a = this.getAlpha() * img.loadAlpha;
-        this.mosaic.draw(img, x, y, w, h, a);
+
+        //Small
+        var smBounds = this.getSmallDrawBounds(c, r);
+        for(var smC = smBounds.left; smC < smBounds.right; smC++){
+          for(var smR = smBounds.top; smR < smBounds.bottom; smR++){
+            var img = this.images[smC][smR];
+            var x = this.getSmallX(c, smC);
+            var y = this.getSmallY(r, smR);
+            var w = this.getSmallW();
+            var h = this.getSmallH();
+            var a = this.getSmallAlpha() * img.loadAlpha;
+            this.mosaic.draw(img, x, y, w, h, a);
+            debugger;
+          }
+        }
+
+        //Middle
+        img = this.images[c][r];
+        x = this.getX(c);
+        y = this.getY(r);
+        w = this.getW();
+        h = this.getH();
+        a = this.getAlpha() * img.loadAlpha;
+        // this.mosaic.draw(img, x, y, w, h, a);
       }
     }
   },
+
+
+
+  //Small
+
+  getSmallAlpha: function() {
+    var alphaRange = this.endAlpha - this.startAlpha;
+    return alphaRange * this.mosaic.getScaleProgress() + this.startAlpha;
+  },
+
+  getSmallDrawBounds: function(col, row) {
+    // x y indices
+    var bounds = {
+      left: 0,
+      right: this.mosaic.cols,
+      top: 0,
+      bottom: this.mosaic.rows
+    };
+
+    var w = this.getSmallW();
+    var h = this.getSmallH();
+
+    var left = this.getSmallX(0);
+    var right = this.getSmallX(this.mosaic.cols-1) + w;
+    var top = this.getSmallY(0);
+    var bottom = this.getSmallY(this.mosaic.rows-1) + h;
+
+    if(left < 0) {
+      bounds.left = Math.floor(-left / w);
+    }
+
+    if(top < 0){
+      bounds.top = Math.floor(-top / h);
+    }
+
+    if(right > this.mosaic.width) {
+      right -= this.mosaic.width;
+      right = Math.floor(right / w);
+      bounds.right -= right;
+    }
+
+    if(bottom > this.mosaic.height) {
+      bottom -= this.mosaic.height;
+      bottom = Math.floor(bottom / h);
+      bounds.bottom -= bottom;
+    }
+
+    return bounds;
+  },
+
+  // offsetX: function(cellX) {
+  //   return -this.mosaic.width * cellX * this.mosaic.getScaleProgress();
+  // },
+  //
+  // offsetY: function(cellY) {
+  //   return -this.mosaic.height * cellY * this.mosaic.getScaleProgress();
+  // },
+
+  getSmallX: function(cellX, smallCellX) {
+    var middleCellX = this.mosaic.width / this.mosaic.cols * cellX * this.mosaic.scale + this.offsetX(this.mosaic.selectedCell.x);
+    // debugger;
+    return middleCellX + this.getSmallW() * smallCellX;
+  },
+
+  getSmallY: function(cellY, smallCellY) {
+    var middleCellY = this.getY(cellY);
+    return middleCellY + this.getSmallH() * smallCellY;
+  },
+
+  getSmallW: function() {
+    return this.mosaic.width / this.mosaic.cols / this.mosaic.cols * this.mosaic.scale;
+  },
+
+  getSmallH: function() {
+    return this.mosaic.height / this.mosaic.rows / this.mosaic.rows * this.mosaic.scale;
+  },
+
+
+
+  //Middle
 
   getDrawBounds: function() {
     var bounds = {
@@ -93,5 +189,5 @@ MiddleGrid.prototype = {
 
   getH: function() {
     return this.mosaic.height / this.mosaic.rows * this.mosaic.scale;
-  }
+  },
 };
