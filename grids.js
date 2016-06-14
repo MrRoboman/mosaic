@@ -37,16 +37,18 @@ MiddleGrid.prototype = {
         this.mosaic.draw(img, x, y, w, h, a);
 
         //Small
-        var smBounds = this.getSmallDrawBounds(c, r);
-        for(var smC = smBounds.left; smC < smBounds.right; smC++){
-          for(var smR = smBounds.top; smR < smBounds.bottom; smR++){
-            img = this.smallImages[smC][smR];
-            x = this.getSmallX(c, smC);
-            y = this.getSmallY(r, smR);
-            w = this.getSmallW();
-            h = this.getSmallH();
-            a = this.getAlpha(0, this.startAlpha) * img.loadAlpha;
-            this.mosaic.draw(img, x, y, w, h, a);
+        if(c === this.mosaic.selectedCell.x && r === this.mosaic.selectedCell.y){
+          var smBounds = this.getSmallDrawBounds(c, r);
+          for(var smC = smBounds.left; smC < smBounds.right; smC++){
+            for(var smR = smBounds.top; smR < smBounds.bottom; smR++){
+              img = this.smallImages[smC][smR];
+              x = this.getSmallX(c, smC);
+              y = this.getSmallY(r, smR);
+              w = this.getSmallW();
+              h = this.getSmallH();
+              a = this.getAlpha(0, this.startAlpha) * img.loadAlpha;
+              this.mosaic.draw(img, x, y, w, h, a);
+            }
           }
         }
       }

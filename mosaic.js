@@ -14,11 +14,7 @@ var Mosaic = function(options) {
   this.initCanvas();
   this.initImages();
 
-  // this.middleGrid = this.getRandomImages();
-  // this.smallGrid = new SmallGrid(this, this.getRandomImages(), 0, .5);
   this.middleGrid = new MiddleGrid(this, this.getRandomImages(), this.getRandomImages(), .33, 1);
-
-  // this.play();
 };
 
 Mosaic.prototype = {
@@ -73,12 +69,19 @@ Mosaic.prototype = {
 
   play: function() {
     this.playing = true;
-    this.startTime = Date.now();
+    TweenLite.to(this, 2, {scale: this.cols, ease: Back.easeOut.config(2), onComplete: this.onTweenComplete.bind(this)});
     window.requestAnimationFrame(this.update.bind(this));
   },
 
   stop: function() {
     this.playing = false;
+  },
+
+  onTweenComplete: function() {
+    this.middleGrid.swapImages(this.selectedCell);
+    this.scale = 1;
+    this.middleGrid.draw();
+    this.stop();
   },
 
   getRandomImages: function() {
@@ -108,17 +111,7 @@ Mosaic.prototype = {
   update: function() {
     if(this.playing) {
 
-      var elapsed = Date.now() - this.startTime;
-      var progress = elapsed / this.zoomMs;
-
-      this.scale = (this.cols-1) * progress + 1;
-      if(this.scale >= this.cols){
-        this.middleGrid.swapImages(this.selectedCell);
-        this.scale = 1;
-        this.stop();
-      }
-
-      this.clear();
+      // this.clear();
       this.middleGrid.draw();
 
       window.requestAnimationFrame(this.update.bind(this));
